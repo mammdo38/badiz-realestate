@@ -1,0 +1,379 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Search, ShieldCheck, Map, Calculator, ArrowLeft, Phone } from 'lucide-react';
+import { Listing, RegionInfo, BlogPost } from '@/types';
+import ListingCard from '@/components/ListingCard';
+import ContactForm from '@/components/ContactForm';
+import { cn } from '@/utils';
+
+interface Props {
+  initialListings: Listing[];
+  initialRegions: Record<string, RegionInfo>;
+  initialBlogPosts: BlogPost[];
+}
+
+export default function HomeClient({ initialListings, initialRegions, initialBlogPosts }: Props) {
+  const router = useRouter();
+  const [dealFilter, setDealFilter] = useState('all');
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observerRef.current?.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    document.querySelectorAll('.reveal').forEach(el => observerRef.current?.observe(el));
+    return () => observerRef.current?.disconnect();
+  }, [dealFilter]);
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const params = new URLSearchParams();
+    if (formData.get('deal') !== 'all') params.set('deal', formData.get('deal') as string);
+    if (formData.get('type') !== 'all') params.set('type', formData.get('type') as string);
+    if (formData.get('region') !== 'all') params.set('region', formData.get('region') as string);
+    
+    router.push(`/search-results?${params.toString()}`);
+  };
+
+  const filteredListings = dealFilter === 'all' 
+    ? initialListings.slice(0, 6) 
+    : initialListings.filter(l => l.dealType === dealFilter).slice(0, 6);
+
+  return (
+    <div className="flex flex-col">
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-24 pb-32 md:pt-32 md:pb-40 bg-[var(--color-dark-2)] overflow-hidden flex flex-col items-center justify-center min-h-[85vh]">
+        {/* Glow Effects */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-orange)]/15 rounded-full blur-[100px] pointer-events-none mix-blend-screen opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[var(--color-blue)]/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen opacity-50"></div>
+        
+        {/* Grid Overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMCAwIEg0MCBWNDAgSDAgWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz4KPC9zdmc+')] [mask-image:linear-gradient(to_bottom,white_20%,transparent_80%)] opacity-30 pointer-events-none"></div>
+
+        <div className="max-w-5xl mx-auto px-4 relative z-10 w-full text-center flex flex-col items-center">
+          <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white text-sm font-medium animate-[fade-in-up_0.8s_ease-out]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-orange)] shadow-[0_0_8px_var(--color-orange)] animate-pulse"></span>
+            📍 کردان، البرز
+          </div>
+          
+          <h1 className="text-white font-black text-[clamp(2.2rem,5vw,3.5rem)] leading-[1.2] mb-6 drop-shadow-lg max-w-4xl animate-[fade-in-up_1s_ease-out_0.1s_both]">
+            ویلاها و باغ‌های منتخب در <span className="text-[var(--color-orange)]">کـردان</span>
+          </h1>
+          <p className="text-[var(--color-gray-light)] text-lg md:text-xl font-medium mb-12 max-w-2xl leading-relaxed animate-[fade-in-up_1s_ease-out_0.2s_both]">
+            گروه مشاورین املاک بادیز، مرجع تخصصی خرید، فروش و سرمایه‌گذاری ملکی در مناطق لوکس و ییلاقی کردان.
+          </p>
+
+          {/* Search Box */}
+          <div className="w-full max-w-4xl bg-white/10 p-2 rounded-2xl md:rounded-full backdrop-blur-xl border border-white/20 shadow-2xl animate-[fade-in-up_1s_ease-out_0.3s_both]">
+            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-2 md:gap-0 bg-white p-2 md:p-3 rounded-xl md:rounded-full w-full">
+              
+              <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-l border-[var(--color-border)] px-4 py-2">
+                <label htmlFor="deal" className="block text-xs font-bold text-[var(--color-orange)] mb-1 uppercase tracking-wider">نوع معامله</label>
+                <select id="deal" name="deal" className="w-full bg-transparent text-[var(--color-dark)] text-sm font-semibold focus:outline-none cursor-pointer" aria-label="نوع معامله">
+                  <option value="all">همه موارد</option>
+                  <option value="sell">خرید و فروش</option>
+                  <option value="annual_rent">اجاره سالیانه</option>
+                  <option value="daily_rent">اجاره روزانه</option>
+                  <option value="commercial_rent">اجاره تجاری</option>
+                </select>
+              </div>
+
+              <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-l border-[var(--color-border)] px-4 py-2">
+                <label htmlFor="type" className="block text-xs font-bold text-[var(--color-orange)] mb-1 uppercase tracking-wider">نوع ملک</label>
+                <select id="type" name="type" className="w-full bg-transparent text-[var(--color-dark)] text-sm font-semibold focus:outline-none cursor-pointer" aria-label="نوع ملک">
+                  <option value="all">همه انواع ملک</option>
+                  <option value="villa">ویلا</option>
+                  <option value="garden">باغ</option>
+                  <option value="land">زمین</option>
+                  <option value="apartment">آپارتمان</option>
+                </select>
+              </div>
+
+              <div className="w-full md:w-1/3 px-4 py-2 border-b md:border-b-0 md:border-transparent mb-2 md:mb-0">
+                <label htmlFor="region" className="block text-xs font-bold text-[var(--color-orange)] mb-1 uppercase tracking-wider">منطقه</label>
+                <select id="region" name="region" className="w-full bg-transparent text-[var(--color-dark)] text-sm font-semibold focus:outline-none cursor-pointer" aria-label="منطقه">
+                  <option value="all">تمام کردان</option>
+                  <option value="kordan-shomali">کردان شمالی</option>
+                  <option value="kordan-markazi">کردان مرکزی</option>
+                  <option value="kordan-jonoubi">کردان جنوبی</option>
+                </select>
+              </div>
+
+              <button type="submit" className="w-full md:w-auto md:min-w-[140px] bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white h-[52px] rounded-xl md:rounded-full font-bold transition-colors flex items-center justify-center gap-2 px-6 shrink-0 shadow-lg hover:shadow-[0_4px_20px_rgba(232,97,26,0.4)]">
+                <Search size={18} />
+                جستجو
+              </button>
+            </form>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16 mt-16 pt-8 border-t border-white/10 animate-[fade-in-up_1s_ease-out_0.5s_both]">
+            <div className="text-center">
+              <p className="text-3xl font-black text-white mb-1">۴۵۰+</p>
+              <p className="text-sm font-medium text-[var(--color-gray-light)]">آگهی فعال</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-black text-white mb-1">۱۲</p>
+              <p className="text-sm font-medium text-[var(--color-gray-light)]">سال سابقه</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-black text-white mb-1">۲۵۰۰+</p>
+              <p className="text-sm font-medium text-[var(--color-gray-light)]">معامله موفق</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. LISTINGS PREVIEW */}
+      <section id="listings" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 reveal">
+            <div>
+              <p className="text-[var(--color-orange)] font-bold text-xs uppercase tracking-wider mb-2">جدیدترین فرصت‌ها</p>
+              <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-dark)]">ملک‌های منتخب بادیز</h2>
+            </div>
+            {/* Filter Tabs */}
+            <div className="flex overflow-x-auto pb-2 -mx-4 px-4 md:px-0 md:mx-0 md:pb-0 hide-scrollbar gap-2">
+              {[
+                {id: 'all', label: 'همه'},
+                {id: 'sell', label: 'خرید و فروش'},
+                {id: 'annual_rent', label: 'اجاره سالیانه'},
+                {id: 'daily_rent', label: 'اجاره روزانه'}
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setDealFilter(tab.id)}
+                  aria-pressed={dealFilter === tab.id}
+                  className={cn(
+                    "px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300",
+                    dealFilter === tab.id 
+                      ? "bg-[var(--color-dark)] text-white shadow-md transform scale-105" 
+                      : "bg-[var(--color-bg)] text-[var(--color-gray)] hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-orange)]"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {filteredListings.map((listing, i) => (
+              <div key={listing.id} className="reveal" style={{ transitionDelay: `${i * 100}ms` }}>
+                <ListingCard listing={listing} />
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center reveal">
+            <Link href="/search-results" className="inline-flex items-center gap-2 font-bold text-[var(--color-dark)] hover:text-[var(--color-orange)] transition-colors group">
+              مشاهده همه آگهی‌ها
+              <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. REGIONS SECTION */}
+      <section id="regions" className="py-24 bg-[var(--color-bg)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16 reveal">
+            <p className="text-[var(--color-orange)] font-bold text-xs uppercase tracking-wider mb-2">دسته‌بندی جغرافیا</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-dark)]">منطقه مورد نظر را انتخاب کنید</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Object.values(initialRegions).map((region, i) => (
+              <Link 
+                key={region.slug}
+                href={`/${region.slug}`}
+                className="group reveal bg-white rounded-3xl p-8 border-2 border-transparent hover:border-[var(--color-orange)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center"
+                style={{ transitionDelay: `${i * 150}ms` }}
+              >
+                <div className="w-24 h-24 bg-[var(--color-bg)] rounded-full flex items-center justify-center text-5xl mb-6 group-hover:scale-110 group-hover:bg-[var(--color-orange-pale)] transition-all duration-300">
+                  {region.emoji}
+                </div>
+                <h3 className="text-2xl font-bold text-[var(--color-dark)] mb-3">{region.name}</h3>
+                <p className="text-[var(--color-gray)] text-sm mb-8 leading-relaxed max-w-[250px]">
+                  {region.shortDescription}
+                </p>
+                <div className="mt-auto px-4 py-2 bg-[var(--color-bg)] rounded-full text-xs font-bold text-[var(--color-dark)] group-hover:bg-[var(--color-dark)] group-hover:text-white transition-colors">
+                  {region.listingsCount} آگهی فعال
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. ENTRUST SECTION */}
+      <section id="entrust" className="relative py-28 bg-[var(--color-dark-2)] overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_bottom_right,var(--color-dark-2),var(--color-charcoal))]"></div>
+        <div className="absolute -right-64 -top-64 w-[600px] h-[600px] border border-white/5 rounded-full"></div>
+        <div className="absolute -left-32 -bottom-32 w-[400px] h-[400px] border border-[var(--color-orange)]/10 rounded-full"></div>
+
+        <div className="max-w-7xl mx-auto px-4 relative z-10 flex flex-col lg:flex-row items-center gap-16">
+          <div className="lg:w-1/2 text-center lg:text-right reveal">
+            <h2 className="text-4xl lg:text-5xl font-black text-white leading-tight mb-6">
+              ملک خود را به <span className="text-[var(--color-orange)] relative inline-block">بادیز<span className="absolute bottom-1 left-0 w-full h-2 bg-[var(--color-orange)]/30 rounded-full -z-10"></span></span> بسپارید
+            </h2>
+            <p className="text-[var(--color-gray-light)] text-lg mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              با تکیه بر سال‌ها تجربه و پایگاه داده وسیع مشتریان، ملک شما را در سریع‌ترین زمان و با بهترین قیمت ارزش‌گذاری و معامله می‌کنیم.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <a href="#contact" className="w-full sm:w-auto px-8 py-4 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white rounded-xl font-bold transition-colors shadow-lg hover:shadow-[0_4px_20px_rgba(232,97,26,0.4)] whitespace-nowrap">
+                ثبت درخواست مشاوره
+              </a>
+              <a href="tel:02100000000" className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-white/20 hover:border-white hover:bg-white/5 text-white rounded-xl font-bold transition-all whitespace-nowrap flex items-center justify-center gap-2">
+                <Phone size={20} />
+                تماس مستقیم
+              </a>
+            </div>
+          </div>
+
+          <div className="lg:w-1/2 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl reveal">
+              <Calculator size={32} className="text-[var(--color-orange)] mb-4" />
+              <h3 className="text-white font-bold text-lg mb-2">ارزیابی رایگان</h3>
+              <p className="text-[var(--color-gray-mid)] text-sm">کارشناسی دقیق قیمت ملک شما با توجه به شرایط روز بازار.</p>
+            </div>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl reveal">
+              <Map size={32} className="text-[var(--color-orange)] mb-4" />
+              <h3 className="text-white font-bold text-lg mb-2">بازاریابی هدفمند</h3>
+              <p className="text-[var(--color-gray-mid)] text-sm">ارائه ملک به خریداران واقعی از طریق شبکه گسترده ارتباطی.</p>
+            </div>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl reveal sm:col-span-2">
+              <ShieldCheck size={32} className="text-[var(--color-orange)] mb-4" />
+              <h3 className="text-white font-bold text-lg mb-2">معامله مطمئن و حقوقی</h3>
+              <p className="text-[var(--color-gray-mid)] text-sm max-w-md">انعقاد قرارداد تحت نظارت کارشناسان حقوقی و ثبتی، تضمین امنیت سرمایه شما در تمامی مراحل.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. BUYING GUIDE PREVIEW */}
+      <section id="guide" className="py-24 bg-[var(--color-bg)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="mb-12 reveal">
+            <p className="text-[#E8611A] font-bold text-xs uppercase tracking-wider mb-2">محتوای آموزشی</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-dark)] mb-2">راهنمای خرید ملک در کردان</h2>
+            <p className="text-[var(--color-gray)]">هر آنچه پیش از معامله باید بدانید</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[60%_40%] gap-6">
+            <Link href="/magazine/marahel-kharid-villa-kordan" className="group rounded-[20px] overflow-hidden min-h-[320px] md:min-h-[420px] flex flex-col justify-end p-8 relative reveal transition-transform duration-200 hover:scale-[1.01] hover:shadow-[0_24px_50px_rgba(0,0,0,0.25)]">
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,#d4b896,#a07850)] z-0 before:absolute before:inset-0 before:bg-[linear-gradient(135deg,#d4b896,#a07850)]"></div>
+              <div className="absolute inset-0 z-10 bg-[linear-gradient(to_top,rgba(10,10,10,0.9)_0%,rgba(10,10,10,0.2)_60%,transparent_100%)]"></div>
+              
+              <div className="relative z-20">
+                <span className="inline-block bg-[rgba(232,97,26,0.9)] text-white rounded-full px-3 py-1 text-[0.72rem] font-bold mb-[0.8rem]">📋 راهنمای خرید</span>
+                <h3 className="text-white text-[1.35rem] font-[800] leading-[1.3] mb-[0.6rem]">مراحل و نکات حقوقی خرید ویلا در کردان</h3>
+                <p className="text-[rgba(255,255,255,0.75)] text-[0.85rem] leading-[1.65] line-clamp-2">در این مقاله به بررسی کامل مراحل یک معامله امن می‌پردازیم؛ از استعلامات ثبتی و جهاد کشاورزی تا تنظیم مبایعه نامه حقوقی.</p>
+                <div className="flex items-center gap-3 text-[rgba(255,255,255,0.55)] text-[0.75rem] mt-[0.8rem]">
+                  <span>۱۵ آذر ۱۴۰۳</span>
+                  <span className="w-1 h-1 bg-[rgba(255,255,255,0.55)] rounded-full"></span>
+                  <span>۷ دقیقه مطالعه</span>
+                </div>
+                <span className="inline-flex bg-[#E8611A] text-white rounded-lg px-4 py-[0.45rem] text-[0.82rem] font-bold mt-[0.9rem] transition-all duration-200">
+                  ادامه مطلب ←
+                </span>
+              </div>
+            </Link>
+
+            <div className="flex flex-col gap-4">
+              <Link href="/magazine/rahnamaie-gheymat-melk-kordan-1403" className="flex gap-4 bg-white rounded-[14px] border border-[var(--color-border)] p-4 cursor-pointer transition-all duration-200 hover:border-[#E8611A] hover:-translate-x-[3px] text-inherit no-underline">
+                <div className="w-[80px] h-[80px] shrink-0 rounded-[10px] flex items-center justify-center text-[1.8rem] bg-[linear-gradient(135deg,#b8d4e8,#5a9cc8)]">💰</div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <span className="inline-block self-start bg-[#E8611A] text-white rounded-full px-2 py-0.5 text-[0.65rem] font-bold mb-1">قیمت‌ها</span>
+                  <h3 className="text-[0.88rem] font-bold text-[var(--color-dark)] leading-[1.4] line-clamp-2">راهنمای قیمت ملک در کردان ۱۴۰۳</h3>
+                  <p className="text-[0.73rem] text-[var(--color-gray-mid)] mt-[0.3rem]">۵ دقیقه مطالعه</p>
+                </div>
+              </Link>
+              <Link href="/magazine/behtarin-mantage-kordan-sekunat" className="flex gap-4 bg-white rounded-[14px] border border-[var(--color-border)] p-4 cursor-pointer transition-all duration-200 hover:border-[#E8611A] hover:-translate-x-[3px] text-inherit no-underline">
+                <div className="w-[80px] h-[80px] shrink-0 rounded-[10px] flex items-center justify-center text-[1.8rem] bg-[linear-gradient(135deg,#dcc8e8,#a870c8)]">🗺</div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <span className="inline-block self-start bg-[#E8611A] text-white rounded-full px-2 py-0.5 text-[0.65rem] font-bold mb-1">مناطق</span>
+                  <h3 className="text-[0.88rem] font-bold text-[var(--color-dark)] leading-[1.4] line-clamp-2">بهترین منطقه کردان برای سکونت</h3>
+                  <p className="text-[0.73rem] text-[var(--color-gray-mid)] mt-[0.3rem]">۸ دقیقه مطالعه</p>
+                </div>
+              </Link>
+              <Link href="/magazine/kordan-sarmaiegozari-hoshmand" className="flex gap-4 bg-white rounded-[14px] border border-[var(--color-border)] p-4 cursor-pointer transition-all duration-200 hover:border-[#E8611A] hover:-translate-x-[3px] text-inherit no-underline">
+                <div className="w-[80px] h-[80px] shrink-0 rounded-[10px] flex items-center justify-center text-[1.8rem] bg-[linear-gradient(135deg,#c8dcc8,#7aaa7a)]">📈</div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <span className="inline-block self-start bg-[#E8611A] text-white rounded-full px-2 py-0.5 text-[0.65rem] font-bold mb-1">سرمایه‌گذاری</span>
+                  <h3 className="text-[0.88rem] font-bold text-[var(--color-dark)] leading-[1.4] line-clamp-2">کردان؛ سرمایهگذاری هوشمند</h3>
+                  <p className="text-[0.73rem] text-[var(--color-gray-mid)] mt-[0.3rem]">۶ دقیقه مطالعه</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          <Link href="/magazine" className="block mx-auto mt-8 w-fit border-[1.5px] border-[var(--color-dark)] text-[var(--color-dark)] bg-transparent rounded-[10px] px-8 py-[0.7rem] font-[600] text-[0.9rem] transition-all duration-200 hover:bg-[var(--color-dark)] hover:text-white no-underline text-center">
+            مشاهده همه مقالات
+          </Link>
+        </div>
+      </section>
+
+      {/* 6. CONTACT SECTION */}
+      <section id="contact" className="py-24 bg-[var(--color-bg)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-[var(--color-border)] flex flex-col lg:flex-row reveal relative z-10">
+            {/* Left/Top Content */}
+            <div className="lg:w-2/5 bg-[var(--color-dark)] p-8 md:p-12 text-white relative overflow-hidden flex flex-col justify-center">
+              {/* Pattern */}
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[length:24px_24px]"></div>
+              
+              <div className="relative z-10">
+                <h2 className="text-3xl font-bold mb-4">آیا نیاز به مشاوره دارید؟</h2>
+                <p className="text-[var(--color-gray-light)] mb-10 leading-relaxed text-sm">
+                  فرم را تکمیل کنید تا کارشناسان بادیز املاک در اسرع وقت با شما تماس بگیرند و به سوالات شما پاسخ دهند.
+                </p>
+                
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md">
+                      <Phone className="text-[var(--color-orange)]" size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[var(--color-gray-mid)] mb-1">پاسخگویی ۸ صبح تا ۱۰ شب</p>
+                      <p className="font-mono font-bold text-lg" dir="ltr">۰۲۱ - ۰۰۰۰۰۰۰۰</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md">
+                      <Map className="text-[var(--color-orange)]" size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[var(--color-gray-mid)] mb-1">مراجعه حضوری</p>
+                      <p className="font-bold text-sm leading-snug">بلوار اصلی کردان، دفتر املاک بادیز</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right/Bottom Form */}
+            <div className="lg:w-3/5 p-8 md:p-12">
+              <h3 className="text-xl font-bold text-[var(--color-dark)] mb-6">فرم ثبت درخواست</h3>
+              <ContactForm inquiryType="general" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  );
+}

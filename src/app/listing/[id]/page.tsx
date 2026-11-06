@@ -15,9 +15,9 @@ import { listings } from '@/data';
 import { translateDealType, translatePropertyType, getImageUrl, getAbsoluteImageUrl, cn, getDynamicRegions } from '@/utils';
 
 export async function generateStaticParams() {
-  return listings.map((l) => ({
-    id: l.id.toString(),
-  }));
+  const byId = listings.map((l) => ({ id: l.id.toString() }));
+  const bySlug = listings.filter(l => l.slug && l.slug !== l.id.toString()).map((l) => ({ id: l.slug }));
+  return [...byId, ...bySlug];
 }
 
 export const revalidate = 60;

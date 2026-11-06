@@ -8,6 +8,7 @@ import ListingCard from '@/components/ListingCard';
 import ListingSkeleton from '@/components/ListingSkeleton';
 import { translateDealType, translatePropertyType, formatPrice, numberToPersianWords } from '@/utils';
 import { Listing, RegionInfo } from '@/types';
+import { listings as staticListings } from '@/data';
 
 interface Props {
   initialRegions: Record<string, RegionInfo>;
@@ -129,7 +130,25 @@ export default function SearchResultsClient({ initialRegions }: Props) {
       }
     } catch (error) {
       console.error('Error fetching listings:', error);
-      setHasMore(false); // Stop infinite fetching if the server is down or returns an error
+      // Fallback for static export / GitHub Pages: filter static listings directly
+      let filtered = [...staticListings];
+      if (dealType !== 'all') filtered = filtered.filter(item => item.dealType === dealType);
+      if (propType !== 'all') filtered = filtered.filter(item => item.propertyType === propType);
+      if (regionType !== 'all') filtered = filtered.filter(item => item.region === regionType);
+      if (keyword) {
+        const lower = keyword.toLowerCase();
+        filtered = filtered.filter(item => item.title.toLowerCase().includes(lower) || (item.description && item.description.toLowerCase().includes(lower)));
+      }
+      if (minPrice) filtered = filtered.filter(item => (item.priceRaw || 0) >= Number(minPrice));
+      if (maxPrice) filtered = filtered.filter(item => (item.priceRaw || 0) <= Number(maxPrice));
+      if (minSize) filtered = filtered.filter(item => (item.sizeBuilt || 0) >= Number(minSize) || (item.sizeLand || 0) >= Number(minSize));
+      if (bedrooms) filtered = filtered.filter(item => item.bedrooms >= Number(bedrooms));
+      if (hasPool) filtered = filtered.filter(item => item.features?.includes('استخر'));
+      if (hasParking) filtered = filtered.filter(item => item.parking);
+
+      setResults(filtered);
+      setTotalCount(filtered.length);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }

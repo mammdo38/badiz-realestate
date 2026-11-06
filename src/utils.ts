@@ -48,11 +48,12 @@ export function getImageUrl(filename: string | null | undefined): string {
   if (!filename) return '';
   if (filename.startsWith('http://') || filename.startsWith('https://')) return filename;
   const cleanFilename = filename.replace(/^\/?uploads\//, '').replace(/^\//, '');
-  return `/uploads/${cleanFilename}`;
+  const prefix = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  return `${prefix}/uploads/${cleanFilename}`;
 }
 
 export function getAbsoluteImageUrl(filename: string | null | undefined): string {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://badizvilla.ir';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mammdo38.github.io/badiz-realestate';
   if (!filename) return `${baseUrl}/og-image.jpg`;
   if (filename.startsWith('http://') || filename.startsWith('https://')) return filename;
   const cleanFilename = filename.replace(/^\/?uploads\//, '').replace(/^\//, '');

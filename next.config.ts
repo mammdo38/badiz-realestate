@@ -1,51 +1,19 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const isGithubPages = process.env.GITHUB_ACTIONS === "true" || process.env.NEXT_PUBLIC_BASE_PATH;
+const basePath = isGithubPages ? "/badiz-realestate" : "";
+
 const nextConfig: NextConfig = {
+  output: isGithubPages ? "export" : undefined,
+  basePath: basePath || undefined,
+  assetPrefix: basePath || undefined,
+  trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  async rewrites() {
-    if (process.env.BACKEND_URL) {
-      return [
-        {
-          source: "/api/:path*",
-          destination: `${process.env.BACKEND_URL}/api/:path*`,
-        },
-        {
-          source: "/uploads/:path*",
-          destination: `${process.env.BACKEND_URL}/uploads/:path*`,
-        },
-      ];
-    }
-    return [];
-  },
-  async headers() {
-    return [
-      {
-        source: "/admin/:path*",
-        headers: [
-          {
-            key: "X-Robots-Tag",
-            value: "noindex, nofollow",
-          },
-        ],
-      },
-      {
-        source: "/search-results",
-        headers: [
-          {
-            key: "X-Robots-Tag",
-            value: "noindex, nofollow",
-          },
-        ],
-      },
-    ];
-  },
   images: {
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {

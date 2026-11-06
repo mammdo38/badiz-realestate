@@ -4,7 +4,7 @@ import HomeClient from "./HomeClient";
 import { getDynamicRegions } from "@/utils";
 import { BlogPost, Listing } from "@/types";
 
-export const revalidate = 0; export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function HomePage() {
   let fetchedListings: Listing[] = [...listings];

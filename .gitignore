@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 *.zip
+src/_api_backup/
 
 # debug
 npm-debug.log*

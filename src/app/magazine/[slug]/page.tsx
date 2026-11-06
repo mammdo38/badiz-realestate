@@ -5,12 +5,11 @@ import BlogPostClient from './BlogPostClient';
 import { getDynamicRegions, getAbsoluteImageUrl } from '@/utils';
 import { BlogPost } from '@/types';
 
-// We disable generateStaticParams because the slugs are dynamic now
-// export async function generateStaticParams() {
-//   return blogPosts.map((p) => ({
-//     slug: p.slug,
-//   }));
-// }
+export async function generateStaticParams() {
+  return blogPosts.map((p) => ({
+    slug: p.slug,
+  }));
+}
 
 export const revalidate = 60;
 

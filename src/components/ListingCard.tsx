@@ -12,9 +12,11 @@ interface Props {
 export default function ListingCard({ listing }: Props) {
   const region = regions[listing.region];
 
+  const targetId = listing.id || listing.slug;
+
   return (
     <Link 
-      href={`/listing/${listing.slug}`} 
+      href={`/listing/${targetId}`} 
       className="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-300 cursor-pointer h-full"
     >
       {/* Image Container */}

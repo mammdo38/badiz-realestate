@@ -676,7 +676,7 @@ export default async function ListingPage({ params }: Props) {
                 </div>
                 <div className="space-y-3">
                   {relatedListings.slice(0, 3).map(rel => (
-                    <Link key={rel.id} href={`/listing/${rel.slug}`} className="group flex gap-3 items-center p-2 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
+                    <Link key={rel.id} href={`/listing/${rel.id || rel.slug}`} className="group flex gap-3 items-center p-2 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
                       <div className="w-20 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 relative">
                         {rel.primaryImage ? (
                           <img src={getImageUrl(rel.primaryImage)} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />

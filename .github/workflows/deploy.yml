@@ -36,7 +36,8 @@ jobs:
 
       - name: Build with Next.js
         env:
-          NEXT_PUBLIC_BASE_PATH: /badiz-realestate
+          NEXT_PUBLIC_BASE_PATH: ""
+          NEXT_PUBLIC_SITE_URL: "https://badizvilla.ir"
         run: npm run build -- --webpack
 
       - name: Upload artifact

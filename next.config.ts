@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const isGithubPages = process.env.GITHUB_ACTIONS === "true" || process.env.NEXT_PUBLIC_BASE_PATH;
-const basePath = isGithubPages ? "/badiz-realestate" : "";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const nextConfig: NextConfig = {
   output: isGithubPages ? "export" : undefined,

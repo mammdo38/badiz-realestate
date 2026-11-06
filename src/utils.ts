@@ -47,8 +47,11 @@ export function formatPrice(price: number | null | undefined): string {
 export function getImageUrl(filename: string | null | undefined): string {
   if (!filename) return '';
   if (filename.startsWith('http://') || filename.startsWith('https://')) return filename;
-  const cleanFilename = filename.replace(/^\/?uploads\//, '').replace(/^\//, '');
   const prefix = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  if (filename === 'hero-bg.jpg' || filename === '/hero-bg.jpg') {
+    return `${prefix}/hero-bg.jpg`;
+  }
+  const cleanFilename = filename.replace(/^\/?uploads\//, '').replace(/^\//, '');
   return `${prefix}/uploads/${cleanFilename}`;
 }
 

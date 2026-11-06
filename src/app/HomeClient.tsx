@@ -8,7 +8,7 @@ import { Search, ShieldCheck, Map, Calculator, ArrowLeft, Phone, Home, Calendar,
 import { Listing, RegionInfo, BlogPost } from '@/types';
 import ListingCard from '@/components/ListingCard';
 import ContactForm from '@/components/ContactForm';
-import { cn } from '@/utils';
+import { cn, getImageUrl } from '@/utils';
 
 interface Props {
   initialListings: Listing[];
@@ -62,7 +62,7 @@ export default function HomeClient({ initialListings, investmentListings = [], u
     <div className="flex flex-col">
       {/* 1. HERO SECTION */}
       <section className="relative pt-[120px] pb-20 md:pt-[160px] md:pb-40 overflow-hidden flex flex-col items-center justify-center min-h-[85vh]">
-        <Image src="/hero-bg.jpg" alt="خرید ویلا در کردان" fill priority className="object-cover object-center z-0" sizes="100vw" quality={70} />
+        <Image src={getImageUrl('hero-bg.jpg')} alt="خرید ویلا در کردان" fill priority className="object-cover object-center z-0" sizes="100vw" quality={70} />
         {/* Glow Effects */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-orange)]/15 rounded-full blur-[100px] pointer-events-none mix-blend-screen opacity-50"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[var(--color-blue)]/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen opacity-50"></div>
@@ -396,7 +396,7 @@ export default function HomeClient({ initialListings, investmentListings = [], u
                   <Link href={`/magazine/${post.slug}`} className="group rounded-[20px] overflow-hidden min-h-[320px] md:min-h-[420px] flex flex-col justify-end p-8 relative reveal transition-transform duration-200 hover:scale-[1.01] hover:shadow-[0_24px_50px_rgba(0,0,0,0.25)]">
                     {post.coverImage ? (
                       <div className="absolute inset-0 z-0">
-                        <img src={`/uploads/${post.coverImage}`} alt={post.title} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(post.coverImage)} alt={post.title} className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className={cn("absolute inset-0 z-0 before:absolute before:inset-0 bg-gradient-to-br", post.bgGradient || 'from-[#d4b896] to-[#a07850]', "before:bg-gradient-to-br before:from-black/20 before:to-transparent")}></div>
@@ -425,7 +425,7 @@ export default function HomeClient({ initialListings, investmentListings = [], u
                   <Link key={post.slug} href={`/magazine/${post.slug}`} className="flex gap-4 bg-white rounded-[14px] border border-[var(--color-border)] p-4 cursor-pointer transition-all duration-200 hover:border-[var(--color-orange)] hover:-translate-x-[3px] text-inherit no-underline">
                     {post.coverImage ? (
                       <div className="w-[80px] h-[80px] shrink-0 rounded-[10px] overflow-hidden">
-                        <img src={`/uploads/${post.coverImage}`} alt={post.title} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(post.coverImage)} alt={post.title} className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className={cn("w-[80px] h-[80px] shrink-0 rounded-[10px] flex items-center justify-center bg-gradient-to-br", post.bgGradient || 'from-gray-100 to-gray-200')}><Newspaper size={28} className="text-[var(--color-gray-mid)]" /></div>
